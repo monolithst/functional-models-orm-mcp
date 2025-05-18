@@ -113,21 +113,15 @@ describe('/src/libs.ts', () => {
     expect(metas[0]).to.have.property('name')
   })
 
-  it('should allow null for non-required ObjectProperty in generateOpenApiSchema', () => {
+  it('should allow nullable for non-required ObjectProperty in generateOpenApiSchema', () => {
     const props = {
       meta: ObjectProperty({}),
       requiredMeta: ObjectProperty({ required: true }),
     }
     const schema = generateOpenApiSchema(props, ['requiredMeta'])
-    // Not required: should have oneOf
-    expect(schema.properties.meta).to.have.property('oneOf')
-    // @ts-ignore
-    expect(schema.properties.meta.oneOf).to.deep.include.members([
-      { type: 'object' },
-      { type: 'null' },
-    ])
-    // Required: should not have oneOf, just type object
-    expect(schema.properties.requiredMeta).to.have.property('type', 'object')
-    expect(schema.properties.requiredMeta).to.not.have.property('oneOf')
+    // Not required: should have nullable true
+    expect(schema.properties.meta).to.have.property('nullable', true)
+    // Required: should not have nullable
+    expect(schema.properties.requiredMeta).to.not.have.property('nullable')
   })
 })

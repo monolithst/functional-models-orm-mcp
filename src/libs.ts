@@ -72,8 +72,8 @@ export const generateOpenApiSchema = (
         ...(mapped.description ? { description: mapped.description } : {}),
         ...(mapped.enum ? { enum: mapped.enum } : {}),
       }
-      if (!isRequired && mapped.type === 'object') {
-        schema = { oneOf: [schema, { type: 'null' }] }
+      if (!isRequired) {
+        schema.nullable = true
       }
       return {
         ...acc,
