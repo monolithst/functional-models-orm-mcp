@@ -66,13 +66,18 @@ export const generateOpenApiSchema = (
   const props = Object.entries(properties).reduce(
     (acc, [key, prop]) => {
       const mapped = mapPropertyToOpenApi(prop)
+      const isRequired = requiredFields.includes(key)
+      let schema: any = {
+        type: mapped.type,
+        ...(mapped.description ? { description: mapped.description } : {}),
+        ...(mapped.enum ? { enum: mapped.enum } : {}),
+      }
+      if (!isRequired && mapped.type === 'object') {
+        schema = { oneOf: [schema, { type: 'null' }] }
+      }
       return {
         ...acc,
-        [key]: {
-          type: mapped.type,
-          ...(mapped.description ? { description: mapped.description } : {}),
-          ...(mapped.enum ? { enum: mapped.enum } : {}),
-        },
+        [key]: schema,
       }
     },
     {} as Record<string, any>

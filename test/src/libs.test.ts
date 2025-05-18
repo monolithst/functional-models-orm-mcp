@@ -25,6 +25,7 @@ describe('/src/libs.ts', () => {
       namespace: 'Test',
       pluralName: 'Tests',
       properties: {
+        // @ts-ignore
         name: TextProperty({ required: true, description: 'Name' }),
         age: IntegerProperty({}),
       },
@@ -38,6 +39,7 @@ describe('/src/libs.ts', () => {
   })
 
   it('should map TextProperty to OpenAPI schema', () => {
+    // @ts-ignore
     const prop = TextProperty({ description: 'desc' })
     expect(mapPropertyToOpenApi(prop)).to.deep.equal({
       type: 'string',
@@ -109,5 +111,23 @@ describe('/src/libs.ts', () => {
     expect(metas).to.be.an('array')
     expect(metas.length).to.be.greaterThan(0)
     expect(metas[0]).to.have.property('name')
+  })
+
+  it('should allow null for non-required ObjectProperty in generateOpenApiSchema', () => {
+    const props = {
+      meta: ObjectProperty({}),
+      requiredMeta: ObjectProperty({ required: true }),
+    }
+    const schema = generateOpenApiSchema(props, ['requiredMeta'])
+    // Not required: should have oneOf
+    expect(schema.properties.meta).to.have.property('oneOf')
+    // @ts-ignore
+    expect(schema.properties.meta.oneOf).to.deep.include.members([
+      { type: 'object' },
+      { type: 'null' },
+    ])
+    // Required: should not have oneOf, just type object
+    expect(schema.properties.requiredMeta).to.have.property('type', 'object')
+    expect(schema.properties.requiredMeta).to.not.have.property('oneOf')
   })
 })
