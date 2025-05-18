@@ -1,4 +1,9 @@
-import { ModelType } from 'functional-models'
+import {
+  ModelType,
+  PropertyConfig,
+  PropertyInstance,
+  PropertyType,
+} from 'functional-models'
 import { McpToolMeta, ToolNameGenerator, OpenAPISchema } from './types'
 
 // Default tool name generator: lower_case_with_underscores
@@ -14,49 +19,41 @@ export const defaultToolNameGenerator: ToolNameGenerator = (
 
 // Map a functional-models property instance to OpenAPI schema property
 export const mapPropertyToOpenApi = (
-  property: any
+  property: PropertyInstance<any>
 ): {
   type: string
   description?: string
   enum?: string[]
 } => {
-  const typeMap: Record<string, string> = {
-    TextProperty: 'string',
-    BigTextProperty: 'string',
-    NumberProperty: 'number',
-    IntegerProperty: 'integer',
-    YearProperty: 'integer',
-    DateProperty: 'string',
-    DatetimeProperty: 'string',
-    ArrayProperty: 'array',
-    SingleTypeArrayProperty: 'array',
-    ObjectProperty: 'object',
-    BooleanProperty: 'boolean',
-    ConstantValueProperty: 'string',
-    PrimaryKeyUuidProperty: 'string',
-    ModelReferenceProperty: 'string',
-    AdvancedModelReferenceProperty: 'string',
-    DenormalizedProperty: 'string',
-    DenormalizedTextProperty: 'string',
-    DenormalizedNumberProperty: 'number',
-    DenormalizedIntegerProperty: 'integer',
-    NaturalIdProperty: 'string',
-    EmailProperty: 'string',
-    LastModifiedDateProperty: 'string',
+  const typeMap: Record<PropertyType, string> = {
+    [PropertyType.Array]: 'array',
+    [PropertyType.BigText]: 'string',
+    [PropertyType.Boolean]: 'boolean',
+    [PropertyType.Date]: 'string',
+    [PropertyType.Datetime]: 'string',
+    [PropertyType.Email]: 'string',
+    [PropertyType.Integer]: 'integer',
+    [PropertyType.ModelReference]: 'string',
+    [PropertyType.Number]: 'number',
+    [PropertyType.Object]: 'object',
+    [PropertyType.Text]: 'string',
+    [PropertyType.UniqueId]: 'string',
   }
-  const ctor = property?.constructor?.name
-  const type = typeMap[ctor]
+  const type = typeMap[property.getPropertyType() as PropertyType]
   if (!type) {
-    throw new Error(`Unsupported property type: ${ctor}`)
+    throw new Error(`Unsupported property type: ${property.getPropertyType()}`)
   }
-  const config = property.getConfig?.() || {}
-  const desc = config.description
-  const enumVals = property.getChoices?.() || config.choices
-  // Only add enum if present, and only add description if present
+  const config = property.getConfig() as PropertyConfig<any>
+  // @ts-ignore
+  const desc = config?.description
+  const enumVals = property.getChoices()
+
   const result: { type: string; description?: string; enum?: string[] } = {
     type,
     ...(desc ? { description: desc } : {}),
-    ...(enumVals ? { enum: enumVals } : {}),
+    ...(enumVals && enumVals.length > 0
+      ? { enum: enumVals.map(x => `${x}`) }
+      : {}),
   }
   return result
 }
@@ -97,7 +94,7 @@ export const generateMcpToolForModelOperation = (
   const nameGen = opts?.nameGenerator || defaultToolNameGenerator
   const allProps = def.properties
   const requiredFields = Object.entries(allProps)
-    .filter(([_, prop]) => (prop.getConfig?.() as any)?.required)
+    .filter(([, prop]) => (prop.getConfig?.() as any)?.required)
     .map(([k]) => k)
   const fullSchema = generateOpenApiSchema(allProps, requiredFields)
   const idSchema: OpenAPISchema = {
