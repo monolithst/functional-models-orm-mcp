@@ -1,5 +1,5 @@
 {
-  "name": "functional-models-orm-rest-client",
+  "name": "functional-models-orm-mcp",
   "version": "3.0.0",
   "description": "A functional-models-orm datastore provider that uses the @modelcontextprotocol/sdk. Great for using models on a frontend.",
   "main": "index.js",
@@ -35,7 +35,7 @@
   "license": "GPLV3",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/monolithst/functional-models-orm-rest-client.git"
+    "url": "git+https://github.com/monolithst/functional-models-orm-mcp.git"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
