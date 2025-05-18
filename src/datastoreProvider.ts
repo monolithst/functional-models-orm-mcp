@@ -60,13 +60,7 @@ const datastoreProvider = (config: DatastoreProviderConfig) => {
   let lastAccessToken: string | undefined = undefined
 
   // OAuth2 manager (if needed)
-  const httpClient =
-    config.httpClient ||
-    (async args => {
-      const { method, url, data, headers } = args
-      const response = await axios({ method, url, data, headers })
-      return response.data
-    })
+  const httpClient = config.httpClient || axios
   const oauth2Manager = config.oauth2
     ? createOAuth2Manager(config.oauth2, httpClient)
     : undefined

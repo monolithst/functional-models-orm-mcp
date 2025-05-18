@@ -15,7 +15,11 @@ type HttpClientInputs = {
   headers?: object
 }
 
-type HttpClient = <T>(inputs: HttpClientInputs) => Promise<T>
+type HttpClient = <T>(inputs: HttpClientInputs) => Promise<{
+  data: T
+  status: number
+  headers: Record<string, string>
+}>
 
 enum DatastoreMethod {
   save,

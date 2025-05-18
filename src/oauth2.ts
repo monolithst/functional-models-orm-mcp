@@ -52,21 +52,21 @@ export const createOAuth2Manager = (
         data,
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       })
-      if (!response.access_token) {
+      if (!response.data.access_token) {
         throw new Error('OAuth2: No access_token in response')
       }
-      const expiresIn = response.expires_in
-        ? response.expires_in * MS_PER_SECOND
+      const expiresIn = response.data.expires_in
+        ? response.data.expires_in * MS_PER_SECOND
         : DEFAULT_EXPIRY_SECONDS * MS_PER_SECOND
       const newState = {
         ...state,
-        accessToken: response.access_token,
+        accessToken: response.data.access_token,
         expiresAt: Date.now() + expiresIn,
         isRefreshing: false,
         refreshPromise: null,
       }
       state = newState
-      return response.access_token
+      return response.data.access_token
     })()
     state = { ...state, refreshPromise }
     const token = await refreshPromise
