@@ -87,7 +87,13 @@ export const generateOpenApiSchema = (
 // Main function: generate MCP tools for a model
 export const generateMcpToolForModelOperation = (
   model: ModelType<any>,
-  operation: string,
+  operation:
+    | 'save'
+    | 'retrieve'
+    | 'delete'
+    | 'search'
+    | 'bulkInsert'
+    | 'bulkDelete',
   opts?: { nameGenerator?: ToolNameGenerator }
 ): McpToolMeta => {
   const def = model.getModelDefinition()
@@ -239,21 +245,16 @@ export const generateMcpToolForModelOperation = (
         name: nameGen(model, 'retrieve'),
         description: `Retrieve a ${def.pluralName} record by ID`,
         inputSchema: idSchema,
-        outputSchema: fullSchema,
-      }
-    case 'update':
-      return {
-        name: nameGen(model, 'update'),
-        description: `Update a ${def.pluralName} record by ID`,
-        inputSchema: fullSchema,
-        outputSchema: fullSchema,
+        outputSchema: {
+          oneOf: [fullSchema, { type: 'null' }],
+        },
       }
     case 'delete':
       return {
         name: nameGen(model, 'delete'),
         description: `Delete a ${def.pluralName} record by ID`,
         inputSchema: idSchema,
-        outputSchema: { type: 'object', properties: {}, required: [] },
+        outputSchema: { type: 'null' },
       }
     case 'search':
       return {
@@ -262,31 +263,26 @@ export const generateMcpToolForModelOperation = (
         inputSchema: querySchema,
         outputSchema: {
           type: 'object',
-          properties: { results: { type: 'array' } },
-          required: ['results'],
+          properties: {
+            instances: { type: 'array' },
+            page: { type: 'object' },
+          },
+          required: ['instances'],
         },
       }
     case 'bulkInsert':
       return {
         name: nameGen(model, 'bulkInsert'),
         description: `Bulk insert ${def.pluralName} records`,
-        inputSchema: {
-          type: 'object',
-          properties: { items: { type: 'array' } },
-          required: ['items'],
-        },
-        outputSchema: {
-          type: 'object',
-          properties: { results: { type: 'array' } },
-          required: ['results'],
-        },
+        inputSchema: idArraySchema,
+        outputSchema: { type: 'null' },
       }
     case 'bulkDelete':
       return {
         name: nameGen(model, 'bulkDelete'),
         description: `Bulk delete ${def.pluralName} records by IDs`,
         inputSchema: idArraySchema,
-        outputSchema: { type: 'object', properties: {}, required: [] },
+        outputSchema: { type: 'null' },
       }
     default:
       throw new Error(`Unknown operation: ${operation}`)
@@ -297,14 +293,13 @@ export const generateMcpToolsForModel = (
   model: ModelType<any>,
   opts?: { nameGenerator?: ToolNameGenerator }
 ): McpToolMeta[] => {
-  const operations = [
-    'save',
-    'retrieve',
-    'update',
-    'delete',
-    'search',
-    'bulkInsert',
-    'bulkDelete',
-  ]
+  const operations: (
+    | 'save'
+    | 'retrieve'
+    | 'delete'
+    | 'search'
+    | 'bulkInsert'
+    | 'bulkDelete'
+  )[] = ['save', 'retrieve', 'delete', 'search', 'bulkInsert', 'bulkDelete']
   return operations.map(op => generateMcpToolForModelOperation(model, op, opts))
 }

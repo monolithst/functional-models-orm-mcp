@@ -3,6 +3,7 @@ import {
   ModelType,
   PrimaryKeyType,
   DataDescription,
+  DatastoreAdapter,
 } from 'functional-models'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
@@ -48,7 +49,9 @@ const createTransport = (
   throw new Error(`Unsupported connection type: ${connection.type}`)
 }
 
-const datastoreProvider = (config: DatastoreProviderConfig) => {
+const datastoreProvider = (
+  config: DatastoreProviderConfig
+): DatastoreAdapter => {
   // eslint-disable-next-line functional/no-let
   let mcpClient: Client | undefined = undefined
   // eslint-disable-next-line functional/no-let
@@ -148,7 +151,8 @@ const datastoreProvider = (config: DatastoreProviderConfig) => {
   ) => {
     const tool = generateMcpToolForModelOperation(model as any, 'bulkInsert')
     const input = { items: await Promise.all(instances.map(i => i.toObj())) }
-    return executeTool(tool, input)
+    await executeTool(tool, input)
+    return
   }
 
   // RETRIEVE
@@ -157,24 +161,14 @@ const datastoreProvider = (config: DatastoreProviderConfig) => {
     return executeTool(tool, { id })
   }
 
-  // UPDATE
-  const update = async <T extends DataDescription>(
-    instance: ModelInstance<T>
-  ) => {
-    const model = instance.getModel()
-    const tool = generateMcpToolForModelOperation(model as any, 'update')
-    const input = await instance.toObj()
-    return executeTool(tool, input)
-  }
-
   // DELETE (single)
   const deleteObj = async <T extends DataDescription>(
-    instance: ModelInstance<T>
+    model: ModelType<T>,
+    id: PrimaryKeyType
   ) => {
-    const model = instance.getModel()
     const tool = generateMcpToolForModelOperation(model as any, 'delete')
-    const id = instance.getPrimaryKey()
-    return executeTool(tool, { id })
+    await executeTool(tool, { id })
+    return
   }
 
   // SEARCH
@@ -192,16 +186,17 @@ const datastoreProvider = (config: DatastoreProviderConfig) => {
     ids: readonly PrimaryKeyType[]
   ) => {
     const tool = generateMcpToolForModelOperation(model as any, 'bulkDelete')
-    return executeTool(tool, { ids })
+    await executeTool(tool, { ids })
+    return
   }
 
   return {
     save,
-    bulkInsert,
     retrieve,
-    update,
     delete: deleteObj,
     search,
+    bulkInsert,
+    // @ts-ignore
     bulkDelete,
   }
 }
