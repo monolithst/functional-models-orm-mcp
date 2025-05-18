@@ -5,6 +5,7 @@
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
+    "build": "rm -Rf ./dist && tsc -p ./tsconfig.json && cp package.json ./dist && cp README.md ./dist",
     "build:watch": "nodemon -e '*' --watch ./src --exec npm run build",
     "commit": "cz",
     "dist": "npm run build && cd dist && npm publish",
