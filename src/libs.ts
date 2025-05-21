@@ -89,36 +89,8 @@ export const generateOpenApiSchema = (
   }
 }
 
-// Main function: generate MCP tools for a model
-export const generateMcpToolForModelOperation = (
-  model: ModelType<any>,
-  operation:
-    | 'save'
-    | 'retrieve'
-    | 'delete'
-    | 'search'
-    | 'bulkInsert'
-    | 'bulkDelete',
-  opts?: { nameGenerator?: ToolNameGenerator }
-): McpToolMeta => {
-  const def = model.getModelDefinition()
-  const nameGen = opts?.nameGenerator || defaultToolNameGenerator
-  const allProps = def.properties
-  const requiredFields = Object.entries(allProps)
-    .filter(([, prop]) => (prop.getConfig?.() as any)?.required)
-    .map(([k]) => k)
-  const fullSchema = generateOpenApiSchema(allProps, requiredFields)
-  const idSchema: OpenAPISchema = {
-    type: 'object',
-    properties: { id: { type: 'string' } },
-    required: ['id'],
-  }
-  const idArraySchema: OpenAPISchema = {
-    type: 'object',
-    properties: { ids: { type: 'array' } },
-    required: ['ids'],
-  }
-  const querySchema: OpenAPISchema = {
+export const getOrmSearchSchema = (): OpenAPISchema => {
+  return {
     type: 'object',
     properties: {
       take: { type: 'integer', description: 'Max records to return' },
@@ -237,6 +209,51 @@ export const generateMcpToolForModelOperation = (
     },
     required: ['query'],
   }
+}
+
+const getModelIdSchema = (): OpenAPISchema => {
+  return {
+    type: 'object',
+    properties: { id: { type: 'string' } },
+  }
+}
+
+const getModelIdArraySchema = (): OpenAPISchema => {
+  return {
+    type: 'object',
+    properties: { ids: { type: 'array' } },
+    required: ['ids'],
+  }
+}
+
+const getModelSchema = (model: ModelType<any>): OpenAPISchema => {
+  const def = model.getModelDefinition()
+  const allProps = def.properties
+  const requiredFields = Object.entries(allProps)
+    // @ts-ignore
+    .filter(([, prop]) => (prop.getConfig?.() as any)?.required)
+    .map(([k]) => k)
+  return generateOpenApiSchema(allProps, requiredFields)
+}
+
+// Main function: generate MCP tools for a model
+export const generateMcpToolForModelOperation = (
+  model: ModelType<any>,
+  operation:
+    | 'save'
+    | 'retrieve'
+    | 'delete'
+    | 'search'
+    | 'bulkInsert'
+    | 'bulkDelete',
+  opts?: { nameGenerator?: ToolNameGenerator }
+): McpToolMeta => {
+  const def = model.getModelDefinition()
+  const nameGen = opts?.nameGenerator || defaultToolNameGenerator
+  const fullSchema = getModelSchema(model)
+  const idSchema: OpenAPISchema = getModelIdSchema()
+  const idArraySchema: OpenAPISchema = getModelIdArraySchema()
+  const querySchema: OpenAPISchema = getOrmSearchSchema()
   switch (operation) {
     case 'save':
       return {
