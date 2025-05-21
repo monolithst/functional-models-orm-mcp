@@ -211,14 +211,14 @@ export const getOrmSearchSchema = (): OpenAPISchema => {
   }
 }
 
-const getModelIdSchema = (): OpenAPISchema => {
+export const getModelIdSchema = (): OpenAPISchema => {
   return {
     type: 'object',
     properties: { id: { type: 'string' } },
   }
 }
 
-const getModelIdArraySchema = (): OpenAPISchema => {
+export const getModelIdArraySchema = (): OpenAPISchema => {
   return {
     type: 'object',
     properties: { ids: { type: 'array' } },
@@ -226,7 +226,7 @@ const getModelIdArraySchema = (): OpenAPISchema => {
   }
 }
 
-const getModelSchema = (model: ModelType<any>): OpenAPISchema => {
+export const getModelSchema = (model: ModelType<any>): OpenAPISchema => {
   const def = model.getModelDefinition()
   const allProps = def.properties
   const requiredFields = Object.entries(allProps)
