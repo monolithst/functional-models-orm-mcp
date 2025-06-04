@@ -296,7 +296,16 @@ export const generateMcpToolForModelOperation = (
       return {
         name: nameGen(model, 'bulkInsert'),
         description: `Bulk insert ${def.pluralName} records`,
-        inputSchema: idArraySchema,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            items: {
+              type: 'array',
+              items: fullSchema,
+            },
+          },
+          required: ['items'],
+        },
         outputSchema: { type: 'null' },
       }
     case 'bulkDelete':
