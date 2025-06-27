@@ -129,6 +129,11 @@ const datastoreProvider = (
       arguments: typeof input === 'object' && input !== null ? input : {},
     }
     const response = await mcpClient.callTool(callToolProps)
+    if (response.isError) {
+      const innerError =
+        'error' in response ? { cause: response.error } : undefined
+      throw new Error(`MCP call failed: ${response.error}`, innerError)
+    }
     // @ts-ignore
     const actualData = JSON.parse(response.content[0].text)
     return actualData as TOutput
