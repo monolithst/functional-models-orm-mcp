@@ -1,4 +1,4 @@
-import { ModelType } from 'functional-models'
+import { JsonAble, ModelType } from 'functional-models'
 
 enum HttpMethod {
   get = 'get',
@@ -41,12 +41,7 @@ export type RestClientProviderConfig = Readonly<{
         namespace: string
         modelName: string
       }) => Promise<Record<string, string>>)
-  oauth2?: {
-    tokenUrl: string
-    clientId: string
-    clientSecret: string
-    // For future extensibility: audience?: string; extraParams?: Record<string, string>
-  }
+  oauth2?: OAuth2Config
   mockMode?: boolean
   mockHandler?: (request: any) => Promise<any>
   beforeRequest?: (request: any) => Promise<any> | any
@@ -97,4 +92,5 @@ export type OAuth2Config = {
   clientId: string
   clientSecret: string
   scopes: string[]
+  extraParams?: Record<string, JsonAble>
 }

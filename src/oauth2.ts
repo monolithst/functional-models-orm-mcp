@@ -45,6 +45,7 @@ export const createOAuth2Manager = (
         client_id: config.clientId,
         client_secret: config.clientSecret,
         scope: config.scopes.join(' '),
+        ...(config.extraParams || {}),
       })
       const response = await httpClient<any>({
         method: HttpMethod.post,
