@@ -1,9 +1,11 @@
+import { ZodObject, ZodType, z } from 'zod'
 import {
   ModelType,
   PropertyConfig,
   PropertyInstance,
   PropertyType,
 } from 'functional-models'
+import { modelToOpenApi } from 'functional-models-openapi'
 import { McpToolMeta, ToolNameGenerator, OpenAPISchema } from './types'
 
 // Default tool name generator: lower_case_with_underscores
@@ -15,78 +17,6 @@ export const defaultToolNameGenerator: ToolNameGenerator = (
   return `${def.namespace}_${def.pluralName}_${operation}`
     .replace(/[^a-z0-9]+/giu, '_')
     .toLowerCase()
-}
-
-// Map a functional-models property instance to OpenAPI schema property
-export const mapPropertyToOpenApi = (
-  property: PropertyInstance<any>
-): {
-  type: string
-  description?: string
-  enum?: string[]
-} => {
-  const typeMap: Record<PropertyType, string> = {
-    [PropertyType.Array]: 'array',
-    [PropertyType.BigText]: 'string',
-    [PropertyType.Boolean]: 'boolean',
-    [PropertyType.Date]: 'string',
-    [PropertyType.Datetime]: 'string',
-    [PropertyType.Email]: 'string',
-    [PropertyType.Integer]: 'integer',
-    [PropertyType.ModelReference]: 'string',
-    [PropertyType.Number]: 'number',
-    [PropertyType.Object]: 'object',
-    [PropertyType.Text]: 'string',
-    [PropertyType.UniqueId]: 'string',
-  }
-  const type = typeMap[property.getPropertyType() as PropertyType]
-  if (!type) {
-    throw new Error(`Unsupported property type: ${property.getPropertyType()}`)
-  }
-  const config = property.getConfig() as PropertyConfig<any>
-  // @ts-ignore
-  const desc = config?.description
-  const enumVals = property.getChoices()
-
-  const result: { type: string; description?: string; enum?: string[] } = {
-    type,
-    ...(desc ? { description: desc } : {}),
-    ...(enumVals && enumVals.length > 0
-      ? { enum: enumVals.map(x => `${x}`) }
-      : {}),
-  }
-  return result
-}
-
-// Generate OpenAPI schema for a set of properties
-export const generateOpenApiSchema = (
-  properties: Record<string, any>,
-  requiredFields: string[]
-): OpenAPISchema => {
-  const props = Object.entries(properties).reduce(
-    (acc, [key, prop]) => {
-      const mapped = mapPropertyToOpenApi(prop)
-      const isRequired = requiredFields.includes(key)
-      let schema: any = {
-        type: mapped.type,
-        ...(mapped.description ? { description: mapped.description } : {}),
-        ...(mapped.enum ? { enum: mapped.enum } : {}),
-      }
-      if (!isRequired) {
-        schema.nullable = true
-      }
-      return {
-        ...acc,
-        [key]: schema,
-      }
-    },
-    {} as Record<string, any>
-  )
-  return {
-    type: 'object',
-    properties: props,
-    required: requiredFields.length ? requiredFields : undefined,
-  }
 }
 
 export const getOrmSearchSchema = (): OpenAPISchema => {
@@ -226,17 +156,6 @@ export const getModelIdArraySchema = (): OpenAPISchema => {
   }
 }
 
-export const getModelSchema = (model: ModelType<any>): OpenAPISchema => {
-  const def = model.getModelDefinition()
-  const allProps = def.properties
-  const requiredFields = Object.entries(allProps)
-    // @ts-ignore
-    .filter(([, prop]) => (prop.getConfig?.() as any)?.required)
-    .map(([k]) => k)
-  return generateOpenApiSchema(allProps, requiredFields)
-}
-
-// Main function: generate MCP tools for a model
 export const generateMcpToolForModelOperation = (
   model: ModelType<any>,
   operation:
@@ -250,7 +169,7 @@ export const generateMcpToolForModelOperation = (
 ): McpToolMeta => {
   const def = model.getModelDefinition()
   const nameGen = opts?.nameGenerator || defaultToolNameGenerator
-  const fullSchema = getModelSchema(model)
+  const fullSchema = modelToOpenApi(model)
   const idSchema: OpenAPISchema = getModelIdSchema()
   const idArraySchema: OpenAPISchema = getModelIdArraySchema()
   const querySchema: OpenAPISchema = getOrmSearchSchema()
