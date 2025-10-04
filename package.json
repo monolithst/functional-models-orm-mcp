@@ -1,6 +1,6 @@
 {
   "name": "functional-models-orm-mcp",
-  "version": "3.2.1",
+  "version": "3.5.0",
   "description": "A functional-models-orm datastore provider that uses the @modelcontextprotocol/sdk. Great for using models on a frontend.",
   "main": "index.js",
   "types": "index.d.ts",
@@ -41,7 +41,7 @@
   },
   "homepage": "https://github.com/monolithst/functional-models-orm-rest-client#readme",
   "devDependencies": {
-    "@cucumber/cucumber": "11.0.1",
+    "@cucumber/cucumber": "^11.3.0",
     "@eslint/compat": "^1.2.0",
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.12.0",
@@ -58,13 +58,14 @@
     "c8": "^10.1.3",
     "chai": "^5.1.2",
     "chai-as-promised": "^8.0.1",
-    "cz-conventional-changelog": "^3.3.0",
+    "cz-conventional-changelog": "^3.0.1",
     "eslint": "9.14.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-functional": "~7.1.0",
     "eslint-plugin-import": "^2.31.0",
     "esprima": "^4.0.1",
+    "functional-models-orm-memory": "^3.0.0",
     "globals": "^15.12.0",
     "handlebars": "^4.7.8",
     "js-yaml": "^4.1.0",
@@ -84,8 +85,10 @@
     "@l4t/mcp-ai": "^1.5.0",
     "@modelcontextprotocol/sdk": "^1.11.4",
     "axios": "^1.9.0",
-    "functional-models": "^3.0.16",
+    "functional-models": "^3.5.1",
+    "functional-models-openapi": "^3.0.2",
     "lodash": "^4.17.21",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "zod": "^4.1.11"
   }
 }

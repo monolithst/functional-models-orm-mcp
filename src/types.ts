@@ -1,4 +1,4 @@
-import { JsonAble, ModelType } from 'functional-models'
+import { JsonAble } from 'functional-models'
 
 enum HttpMethod {
   get = 'get',
@@ -67,10 +67,14 @@ export type DatastoreProviderConfig = {
   version?: string
 }
 
-export type ToolNameGenerator = (
-  model: ModelType<any>,
-  operation: string
-) => string
+export enum ModelOperation {
+  save = 'save',
+  retrieve = 'retrieve',
+  delete = 'delete',
+  search = 'search',
+  bulkInsert = 'bulkInsert',
+  bulkDelete = 'bulkDelete',
+}
 
 export type OpenAPISchema = Readonly<{
   type: 'object'
