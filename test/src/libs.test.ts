@@ -13,7 +13,7 @@ import {
   PrimaryKeyUuidProperty,
 } from 'functional-models'
 import { datastoreAdapter as memoryDatastore } from 'functional-models-orm-memory'
-import { Model, createOrm} from 'functional-models'
+import { Model, createOrm } from 'functional-models'
 import { createSchema } from 'zod-openapi'
 import { z } from 'zod'
 
@@ -25,8 +25,8 @@ const _setup = () => {
     namespace: 'functional-models-orm-memory',
     properties: {
       id: PrimaryKeyUuidProperty(),
-      name: TextProperty({ required: true}),
-    }
+      name: TextProperty({ required: true }),
+    },
   })
   return {
     orm,
@@ -34,5 +34,4 @@ const _setup = () => {
   }
 }
 
-describe('/src/libs.ts', () => {
-})
+describe('/src/libs.ts', () => {})

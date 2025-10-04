@@ -11,7 +11,7 @@ import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
 import { v4 as uuidv4 } from 'uuid'
 import axios from 'axios'
 import { createOAuth2Manager } from './oauth2'
-import { McpToolMeta, DatastoreProviderConfig } from './types'
+import { McpToolMeta, DatastoreProviderConfig, ModelOperation } from './types'
 import { generateMcpToolForModelOperation } from './libs'
 
 const createTransport = (
@@ -144,7 +144,10 @@ const datastoreProvider = (
     instance: ModelInstance<T>
   ) => {
     const model = instance.getModel()
-    const tool = generateMcpToolForModelOperation(model as any, 'save')
+    const tool = generateMcpToolForModelOperation(
+      model as any,
+      ModelOperation.save
+    )
     const input = await instance.toObj()
     return executeTool(tool, input)
   }
@@ -154,7 +157,10 @@ const datastoreProvider = (
     model: any,
     instances: readonly ModelInstance<T>[]
   ) => {
-    const tool = generateMcpToolForModelOperation(model as any, 'bulkInsert')
+    const tool = generateMcpToolForModelOperation(
+      model as any,
+      ModelOperation.bulkInsert
+    )
     const input = { items: await Promise.all(instances.map(i => i.toObj())) }
     await executeTool(tool, input)
     return
@@ -162,7 +168,10 @@ const datastoreProvider = (
 
   // RETRIEVE
   const retrieve = async (model: any, id: PrimaryKeyType) => {
-    const tool = generateMcpToolForModelOperation(model as any, 'retrieve')
+    const tool = generateMcpToolForModelOperation(
+      model as any,
+      ModelOperation.retrieve
+    )
     return executeTool(tool, { id })
   }
 
@@ -171,7 +180,10 @@ const datastoreProvider = (
     model: ModelType<T>,
     id: PrimaryKeyType
   ) => {
-    const tool = generateMcpToolForModelOperation(model as any, 'delete')
+    const tool = generateMcpToolForModelOperation(
+      model as any,
+      ModelOperation.delete
+    )
     await executeTool(tool, { id })
     return
   }
@@ -181,7 +193,10 @@ const datastoreProvider = (
     model: ModelType<T>,
     ormQuery: any
   ) => {
-    const tool = generateMcpToolForModelOperation(model as any, 'search')
+    const tool = generateMcpToolForModelOperation(
+      model as any,
+      ModelOperation.search
+    )
     return executeTool(tool, ormQuery)
   }
 
@@ -190,7 +205,10 @@ const datastoreProvider = (
     model: ModelType<T>,
     ids: readonly PrimaryKeyType[]
   ) => {
-    const tool = generateMcpToolForModelOperation(model as any, 'bulkDelete')
+    const tool = generateMcpToolForModelOperation(
+      model as any,
+      ModelOperation.bulkDelete
+    )
     await executeTool(tool, { ids })
     return
   }
