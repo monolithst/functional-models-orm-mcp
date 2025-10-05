@@ -286,3 +286,7 @@ export const generateMcpToolsForModel = (
 }
 
 export const defaultModelTypeGetter = (model: ModelType<any>) => model.getName()
+export const defaultModelTypeParser = (modelType: string) => {
+  const [domain, modelName] = modelType.split('/')
+  return { domain, modelName }
+}
