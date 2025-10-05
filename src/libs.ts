@@ -284,3 +284,5 @@ export const generateMcpToolsForModel = (
   ]
   return operations.map(op => generateMcpToolForModelOperation(model, op))
 }
+
+export const defaultModelTypeGetter = (model: ModelType<any>) => model.getName()

@@ -12,7 +12,10 @@ import { v4 as uuidv4 } from 'uuid'
 import axios from 'axios'
 import { createOAuth2Manager } from './oauth2'
 import { McpToolMeta, DatastoreProviderConfig, ModelOperation } from './types'
-import { generateMcpToolForModelOperation } from './libs'
+import {
+  defaultModelTypeGetter,
+  generateMcpToolForModelOperation,
+} from './libs'
 
 const createTransport = (
   connection: { type: 'http' | 'sse'; url: string },
@@ -52,6 +55,7 @@ const createTransport = (
 const datastoreProvider = (
   config: DatastoreProviderConfig
 ): DatastoreAdapter => {
+  const modelTypeGetter = config.modelTypeGetter || defaultModelTypeGetter
   // eslint-disable-next-line functional/no-let
   let mcpClient: Client | undefined = undefined
   // eslint-disable-next-line functional/no-let
@@ -149,7 +153,10 @@ const datastoreProvider = (
       ModelOperation.save
     )
     const input = await instance.toObj()
-    return executeTool(tool, input)
+    return executeTool(tool, {
+      modelType: modelTypeGetter(model as any),
+      instance: input,
+    })
   }
 
   // BULK INSERT
@@ -161,7 +168,10 @@ const datastoreProvider = (
       model as any,
       ModelOperation.bulkInsert
     )
-    const input = { items: await Promise.all(instances.map(i => i.toObj())) }
+    const input = {
+      modelType: modelTypeGetter(model as any),
+      items: await Promise.all(instances.map(i => i.toObj())),
+    }
     await executeTool(tool, input)
     return
   }
@@ -172,7 +182,7 @@ const datastoreProvider = (
       model as any,
       ModelOperation.retrieve
     )
-    return executeTool(tool, { id })
+    return executeTool(tool, { id, modelType: modelTypeGetter(model as any) })
   }
 
   // DELETE (single)
@@ -184,7 +194,7 @@ const datastoreProvider = (
       model as any,
       ModelOperation.delete
     )
-    await executeTool(tool, { id })
+    await executeTool(tool, { id, modelType: modelTypeGetter(model as any) })
     return
   }
 
@@ -197,7 +207,10 @@ const datastoreProvider = (
       model as any,
       ModelOperation.search
     )
-    return executeTool(tool, ormQuery)
+    return executeTool(tool, {
+      modelType: modelTypeGetter(model as any),
+      query: ormQuery,
+    })
   }
 
   // BULK DELETE
@@ -209,7 +222,7 @@ const datastoreProvider = (
       model as any,
       ModelOperation.bulkDelete
     )
-    await executeTool(tool, { ids })
+    await executeTool(tool, { ids, modelType: modelTypeGetter(model as any) })
     return
   }
 

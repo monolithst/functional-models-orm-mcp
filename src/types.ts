@@ -1,4 +1,4 @@
-import { JsonAble } from 'functional-models'
+import { DataDescription, JsonAble, ModelType } from 'functional-models'
 
 enum HttpMethod {
   get = 'get',
@@ -65,6 +65,7 @@ export type DatastoreProviderConfig = {
   httpClient?: HttpClient
   name?: string
   version?: string
+  modelTypeGetter?: <T extends DataDescription>(model: ModelType<T>) => string
 }
 
 export enum ModelOperation {
