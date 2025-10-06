@@ -1,4 +1,5 @@
 import { ModelType } from 'functional-models'
+import { parseModelName } from 'functional-models/lib'
 import { McpToolMeta, OpenAPISchema, ModelOperation } from './types'
 
 export const getOrmSearchSchema = (): OpenAPISchema => {
@@ -287,6 +288,5 @@ export const generateMcpToolsForModel = (
 
 export const defaultModelTypeGetter = (model: ModelType<any>) => model.getName()
 export const defaultModelTypeParser = (modelType: string) => {
-  const [domain, modelName] = modelType.split('/')
-  return { domain, modelName }
+  return parseModelName(modelType)
 }
