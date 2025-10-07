@@ -36,7 +36,7 @@ export const getOrmSearchSchema = (): OpenAPISchema => {
             description: 'Query tokens',
             // @ts-ignore
             items: {
-              oneOf: [
+              anyOf: [
                 {
                   type: 'string',
                   enum: ['AND', 'OR'],
@@ -149,7 +149,11 @@ export const getModelIdArraySchema = (): OpenAPISchema => {
     type: 'object',
     properties: {
       modelType: { type: 'string', description: 'The model type' },
-      ids: { type: 'array', description: 'The model IDs' },
+      ids: {
+        type: 'array',
+        description: 'The model IDs',
+        items: { anyOf: [{ type: 'string' }, { type: 'integer' }] },
+      },
     },
     required: ['modelType', 'ids'],
   }
@@ -180,7 +184,7 @@ export const createMcpToolRetrieve = (model?: ModelType<any>): McpToolMeta => {
     description: `Retrieve a model record by ID`,
     inputSchema: idSchema,
     outputSchema: {
-      oneOf: [schema, { type: 'null' }],
+      anyOf: [schema, { type: 'null' }],
     },
   }
 }
