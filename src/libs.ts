@@ -123,11 +123,6 @@ export const getOrmSearchSchema = (): OpenAPISchema => {
                   },
                   required: ['type', 'key', 'date', 'valueType'],
                 },
-                {
-                  type: 'array',
-                  items: { $ref: '#' },
-                  description: 'Nested QueryTokens',
-                },
               ],
             },
           },
