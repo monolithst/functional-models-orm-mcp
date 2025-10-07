@@ -152,6 +152,7 @@ export const getModelIdArraySchema = (): OpenAPISchema => {
       ids: {
         type: 'array',
         description: 'The model IDs',
+        // @ts-ignore
         items: { anyOf: [{ type: 'string' }, { type: 'integer' }] },
       },
     },
