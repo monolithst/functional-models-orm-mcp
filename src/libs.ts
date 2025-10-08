@@ -7,9 +7,9 @@ export const getOrmSearchSchema = (): OpenAPISchema => {
     type: 'object',
     properties: {
       modelType: { type: 'string', description: 'The model type' },
-      query: {
+      search: {
         type: 'object',
-        description: 'Search query',
+        description: 'The structured search query.',
         // @ts-ignore
         properties: {
           take: { type: 'integer', description: 'Max records to return' },
@@ -129,7 +129,7 @@ export const getOrmSearchSchema = (): OpenAPISchema => {
         },
       },
     },
-    required: ['modelType', 'query'],
+    required: ['modelType', 'search'],
   }
 }
 
