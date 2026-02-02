@@ -209,7 +209,7 @@ const datastoreProvider = (
     )
     return executeTool(tool, {
       modelType: modelTypeGetter(model as any),
-      query: ormQuery,
+      search: ormQuery,
     })
   }
 
