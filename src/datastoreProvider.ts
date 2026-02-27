@@ -7,33 +7,52 @@ import {
 } from 'functional-models'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+import { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
 import { v4 as uuidv4 } from 'uuid'
 import axios from 'axios'
 import { createOAuth2Manager } from './oauth2'
-import { McpToolMeta, DatastoreProviderConfig, ModelOperation } from './types'
+import {
+  McpToolMeta,
+  DatastoreProviderConfig,
+  ModelOperation,
+  HttpConnection,
+  CliConnection,
+} from './types'
 import {
   defaultModelTypeGetter,
   generateMcpToolForModelOperation,
 } from './libs'
 
-const createTransport = (
-  connection: { type: 'http' | 'sse'; url: string },
+const createTransport = async (
+  connection: HttpConnection | CliConnection,
   auth?: { accessToken?: string; apiKey?: string }
-): StreamableHTTPClientTransport => {
+): Promise<Transport> => {
   if (connection.type === 'http') {
-    return new StreamableHTTPClientTransport(new URL(connection.url), {
-      ...(auth?.accessToken
-        ? {
-            requestInit: {
-              headers: { Authorization: `Bearer ${auth.accessToken}` },
-            },
-          }
-        : {}),
-      ...(auth?.apiKey
-        ? { requestInit: { headers: { 'x-api-key': auth.apiKey } } }
-        : {}),
+    return Promise.resolve(
+      new StreamableHTTPClientTransport(new URL(connection.url), {
+        ...(auth?.accessToken
+          ? {
+              requestInit: {
+                headers: { Authorization: `Bearer ${auth.accessToken}` },
+              },
+            }
+          : {}),
+        ...(auth?.apiKey
+          ? { requestInit: { headers: { 'x-api-key': auth.apiKey } } }
+          : {}),
+      })
+    )
+  }
+  if (connection.type === 'cli') {
+    const module = await import('@modelcontextprotocol/sdk/client/stdio.js')
+    return new module.StdioClientTransport({
+      command: connection.path,
+      args: connection.args,
+      env: connection.env,
+      cwd: connection.cwd,
     })
   }
+  // @ts-ignore
   throw new Error(`Unsupported connection type: ${connection.type}`)
 }
 
@@ -44,9 +63,7 @@ const datastoreProvider = (
   // eslint-disable-next-line functional/no-let
   let mcpClient: Client | undefined = undefined
   // eslint-disable-next-line functional/no-let
-  let transport:
-    | StreamableHTTPClientTransport
-    | undefined = undefined
+  let transport: Transport | undefined = undefined
   // eslint-disable-next-line functional/no-let
   let lastAccessToken: string | undefined = undefined
 
@@ -63,7 +80,7 @@ const datastoreProvider = (
     const clientVersion = config.version || '1.0.0'
     if (directOauthToken) {
       if (!mcpClient) {
-        transport = createTransport(config.connection, {
+        transport = await createTransport(config.connection, {
           accessToken: directOauthToken,
         })
         mcpClient = new Client({ name: clientName, version: clientVersion })
@@ -80,7 +97,7 @@ const datastoreProvider = (
           mcpClient = undefined
           transport = undefined
         }
-        transport = createTransport(config.connection, { accessToken })
+        transport = await createTransport(config.connection, { accessToken })
         // eslint-disable-next-line require-atomic-updates
         mcpClient = new Client({ name: clientName, version: clientVersion })
         await mcpClient.connect(transport)
@@ -90,7 +107,7 @@ const datastoreProvider = (
       return
     }
     if (!mcpClient) {
-      transport = createTransport(config.connection, {
+      transport = await createTransport(config.connection, {
         ...(config.credentials?.apiKey
           ? { apiKey: config.credentials.apiKey }
           : {}),

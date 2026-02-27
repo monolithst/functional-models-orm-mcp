@@ -1,6 +1,12 @@
 import { DataDescription, JsonAble, ModelType } from 'functional-models'
 
-enum HttpMethod {
+export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never }
+
+export type XOR<T, U> = T | U extends object
+  ? (T & Without<U, T>) | (U & Without<T, U>)
+  : T | U
+
+export enum HttpMethod {
   get = 'get',
   post = 'post',
   put = 'put',
@@ -8,20 +14,20 @@ enum HttpMethod {
   patch = 'patch',
 }
 
-type HttpClientInputs = {
+export type HttpClientInputs = {
   method: HttpMethod
   url: string
   data?: object
   headers?: object
 }
 
-type HttpClient = <T>(inputs: HttpClientInputs) => Promise<{
+export type HttpClient = <T>(inputs: HttpClientInputs) => Promise<{
   data: T
   status: number
   headers: Record<string, string>
 }>
 
-enum DatastoreMethod {
+export enum DatastoreMethod {
   save,
   retrieve,
   delete,
@@ -49,8 +55,6 @@ export type RestClientProviderConfig = Readonly<{
   httpClient?: HttpClient // Optional custom http client (e.g., axios instance)
 }>
 
-export { HttpMethod, HttpClientInputs, HttpClient, DatastoreMethod }
-
 export type McpToolMeta = {
   name: string
   description?: string
@@ -58,8 +62,27 @@ export type McpToolMeta = {
   outputSchema?: object
 }
 
+export type HttpConnection = Readonly<{
+  type: 'http'
+  url: string
+  headers?: Readonly<Record<string, string>>
+  timeout?: number
+  retry?: Readonly<{
+    attempts: number
+    backoff: number
+  }>
+}>
+
+export type CliConnection = Readonly<{
+  type: 'cli'
+  path: string
+  args?: string[]
+  env?: Record<string, string>
+  cwd?: string
+}>
+
 export type DatastoreProviderConfig = {
-  connection: { type: 'http' | 'sse'; url: string }
+  connection: XOR<HttpConnection, CliConnection>
   oauth2?: OAuth2Config
   credentials?: { apiKey?: string; oauthToken?: string }
   httpClient?: HttpClient
