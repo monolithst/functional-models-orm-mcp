@@ -1,6 +1,6 @@
 {
   "name": "functional-models-orm-mcp",
-  "version": "3.6.6",
+  "version": "3.7.0",
   "description": "A functional-models-orm datastore provider that uses the @modelcontextprotocol/sdk. Great for using models on a frontend.",
   "main": "index.js",
   "types": "index.d.ts",
@@ -82,13 +82,12 @@
     "typescript": "5.3.3"
   },
   "dependencies": {
-    "@l4t/mcp-ai": "^1.6.0",
-    "@modelcontextprotocol/sdk": "^1.11.4",
-    "axios": "^1.9.0",
-    "functional-models": "^3.6.0",
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "axios": "^1.13.6",
+    "functional-models": "^3.9.0",
     "functional-models-openapi": "^3.0.2",
-    "lodash": "^4.17.21",
-    "uuid": "^11.1.0",
-    "zod": "^4.1.11"
+    "lodash": "^4.17.23",
+    "uuid": "^13.0.0",
+    "zod": "^4.3.6"
   }
 }
