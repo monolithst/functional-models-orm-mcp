@@ -7,7 +7,6 @@ import {
 } from 'functional-models'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
 import { v4 as uuidv4 } from 'uuid'
 import axios from 'axios'
 import { createOAuth2Manager } from './oauth2'
@@ -20,23 +19,9 @@ import {
 const createTransport = (
   connection: { type: 'http' | 'sse'; url: string },
   auth?: { accessToken?: string; apiKey?: string }
-): StreamableHTTPClientTransport | SSEClientTransport => {
+): StreamableHTTPClientTransport => {
   if (connection.type === 'http') {
     return new StreamableHTTPClientTransport(new URL(connection.url), {
-      ...(auth?.accessToken
-        ? {
-            requestInit: {
-              headers: { Authorization: `Bearer ${auth.accessToken}` },
-            },
-          }
-        : {}),
-      ...(auth?.apiKey
-        ? { requestInit: { headers: { 'x-api-key': auth.apiKey } } }
-        : {}),
-    })
-  }
-  if (connection.type === 'sse') {
-    return new SSEClientTransport(new URL(connection.url), {
       ...(auth?.accessToken
         ? {
             requestInit: {
@@ -61,7 +46,6 @@ const datastoreProvider = (
   // eslint-disable-next-line functional/no-let
   let transport:
     | StreamableHTTPClientTransport
-    | SSEClientTransport
     | undefined = undefined
   // eslint-disable-next-line functional/no-let
   let lastAccessToken: string | undefined = undefined

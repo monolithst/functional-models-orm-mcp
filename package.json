@@ -87,7 +87,7 @@
     "functional-models": "^3.9.0",
     "functional-models-openapi": "^3.0.2",
     "lodash": "^4.17.23",
-    "uuid": "^13.0.0",
+    "uuid": "^11.1.0",
     "zod": "^4.3.6"
   }
 }
